@@ -4,7 +4,7 @@
       réel</v-card-title>
     <v-col cols="12" md="12" class="box">
       <!-- Currency Converter Form -->
-      <v-form class="currency-form" @submit.prevent="convertCurrency">
+      <v-form class="currency-form" @submit.prevent="fetchData">
         <v-row class="table-boxs">
           <div cols="12" md="12" class="table-boxes">
             <v-col cols="12" md="12" class="table-box1">
@@ -19,11 +19,11 @@
             </v-col>
             <v-col cols="12" md="12" class="text-affiche1">
               <v-icon color=#6C6BBD left class="mr-0">fas fa-eur</v-icon>
-              <h4> Frais de virement : <b> 3.80 USD</b></h4>
+              <h4> Frais de virement : <b> {{ rate }} {{ toCurrency }}</b></h4>
             </v-col>
             <v-col class="text-affiche3">
               <v-icon color=#6C6BBD left class="mr-0">fas fa-eur</v-icon>
-              <h4> Montant total à convertir : <b>2296.20 USD</b></h4>
+              <h4> Montant total à convertir : <b>{{ totals }} {{ toCurrency }}</b></h4>
             </v-col>
           </div>
           <div cols="12" md="12" class="table-box">
@@ -36,7 +36,7 @@
             </v-col>
             <v-col cols="12" md="20" class="text-affiche2">
               <v-icon color=#6C6BBD left class="mr-0">fas fa-eur</v-icon>
-              <h4> Arrivée prévue : <b>laundi</b></h4>
+              <h4> Arrivée prévue : <b>{{ useDateFormat(new Date(), "YYYY-MM-DD (ddd)",{locales: "fr-FR"} ) }}</b></h4>/*(data.time_last_update_utc)*/
             </v-col>
           </div>
         </v-row>
@@ -55,12 +55,14 @@ export default defineComponent({
   name: 'HomeView',
   data() {
     return {
-      amount: null,
-      amountes: null,
+      data: [],
+      amount: 1,
+      amountes: 0,
       recipientAmount: null,
-      fromCurrency: null,
-      toCurrency: null,
-
+      fromCurrency: 'USD',
+      toCurrency: 'EUR',
+      rate: "",
+      totals: "",
       currencies: [
         'USD',
         'EUR',
@@ -102,7 +104,25 @@ export default defineComponent({
     transferMoney() {
       // Implement money transfer logic
       console.log("Transfer", this.transferAmount, this.sendCurrency, "to", this.receiveCurrency);
-    }
+    },
+    fetchData() {
+      fetch(`https://v6.exchangerate-api.com/v6/8f9a008d00c03155895ab447/latest/${this.fromCurrency}`)
+        .then(res => res.json())
+        .then(data => {
+          this.data = data;
+          this.rate = (data.conversion_rates[this.toCurrency]).toFixed(2);
+          this.amountes = (this.amount * this.rate).toFixed(2);
+          this.total = ((this.amount * this.rate) * 0.20).toFixed(2);
+          this.totals = (Number(this.total) + Number(this.amountes)).toFixed(2);
+          this.convertedAmount = (this.amount * this.rate).toFixed(2);
+          this.times = (Date(data.time_last_update_utc));
+
+        })
+    },
+
+  },
+  mounted() {
+    this.fetchData();
   },
 
 });
