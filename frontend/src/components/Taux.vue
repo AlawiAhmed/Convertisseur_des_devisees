@@ -5,8 +5,6 @@
             <v-select v-model="toCurrency" :items="currencies" label="Vers la devise"></v-select>
           </v-col>
           <v-col cols="12" md="12" class="tchange">
-            <v-card >
-            </v-card>
             <v-table class="table-change">
               <thead>
                 <tr>

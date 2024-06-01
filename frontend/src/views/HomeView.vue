@@ -6,6 +6,7 @@
       <Header />
       <Taux />
       <Devices />
+      <Tchange />
     </v-container>
   </v-app>
 </template>
@@ -18,6 +19,7 @@ import NavBar from '@/components/NavBar.vue';
 import Header from '@/components/Header.vue';
 import Taux from '@/components/Taux.vue';
 import Devices from '@/components/Devices.vue';
+import Tchange from '@/components/Tchange.vue';
 
 export default defineComponent({
   name: 'HomeView',
@@ -30,7 +32,7 @@ export default defineComponent({
     
   },
   components: {
-    NavBar,Header,Taux,Devices
+    NavBar,Header,Taux,Devices,Tchange
   },
   
 });

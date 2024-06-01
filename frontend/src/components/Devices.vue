@@ -385,6 +385,7 @@ components: {
 }
 .table-device th,.table-devices th{
   width: 0.2%;
+  font-style: normal;
 }
 .table-device .nom-pays,.table-devices .nom-pays{
   width: 2%;
