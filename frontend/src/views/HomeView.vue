@@ -23,28 +23,11 @@ export default defineComponent({
   name: 'HomeView',
   data() {
     return {
-      amount: null,
-      recipientAmount: null,
-      fromCurrency: null,
-      toCurrency: null,
-      currencies: ["USD", "EUR", "GBP", "JPY"], // Example currencies
+      
     }
   },
   methods: {
-    // convert() {
-    //   // Perform currency conversion logic here
-    //   // This will likely involve fetching exchange rates from an API
-    //   const rate = 1.2; // Placeholder exchange rate
-    //   this.convertedAmount = (this.amount * rate).toFixed(2);
-    // },
-    convertCurrency() {
-      // Implement currency conversion logic
-      console.log("Convert", this.amount, this.fromCurrency, "to", this.toCurrency);
-    },
-    transferMoney() {
-      // Implement money transfer logic
-      console.log("Transfer", this.transferAmount, this.sendCurrency, "to", this.receiveCurrency);
-    }
+    
   },
   components: {
     NavBar,Header,Taux,Devices

@@ -14,12 +14,11 @@
               <v-text-field v-model="amount" label="Montant à convertir" type="number"></v-text-field>
               <v-select v-model="fromCurrency" :items="currencies" label="De la devise" item-value="code"
                 item-text="name">
-
               </v-select>
             </v-col>
             <v-col cols="12" md="12" class="text-affiche1">
               <v-icon color=#6C6BBD left class="mr-0">fas fa-eur</v-icon>
-              <h4> Frais de virement : <b> {{ rate }} {{ toCurrency }}</b></h4>
+              <h4> Frais de virement : <b> {{ rate  }} {{ toCurrency }}</b></h4>
             </v-col>
             <v-col class="text-affiche3">
               <v-icon color=#6C6BBD left class="mr-0">fas fa-eur</v-icon>
@@ -36,7 +35,7 @@
             </v-col>
             <v-col cols="12" md="20" class="text-affiche2">
               <v-icon color=#6C6BBD left class="mr-0">fas fa-eur</v-icon>
-              <h4> Arrivée prévue : <b>{{ useDateFormat(new Date(), "YYYY-MM-DD (ddd)",{locales: "fr-FR"} ) }}</b></h4>/*(data.time_last_update_utc)*/
+              <h4> Arrivée prévue : <b>{{ lastUpdate }}</b></h4>
             </v-col>
           </div>
         </v-row>
@@ -48,20 +47,18 @@
 
 <script>
 import { defineComponent } from 'vue';
-
-// Components
-
 export default defineComponent({
   name: 'HomeView',
   data() {
     return {
       data: [],
-      amount: 1,
-      amountes: 0,
+      amount: '1',
+      amountes: null,
       recipientAmount: null,
-      fromCurrency: 'USD',
-      toCurrency: 'EUR',
-      rate: "",
+      fromCurrency: 'EUR',
+      toCurrency: 'USD',
+      lastUpdate: "",
+      rate: 1,
       totals: "",
       currencies: [
         'USD',
@@ -85,9 +82,7 @@ export default defineComponent({
         'BRL',
         'ZAR',
         // Add more currency codes as needed
-      ]
-
-      , // Example currencies
+      ],
     }
   },
   methods: {
@@ -106,23 +101,31 @@ export default defineComponent({
       console.log("Transfer", this.transferAmount, this.sendCurrency, "to", this.receiveCurrency);
     },
     fetchData() {
-      fetch(`https://v6.exchangerate-api.com/v6/8f9a008d00c03155895ab447/latest/${this.fromCurrency}`)
+      // fetch(`https://v6.exchangerate-api.com/v6/8f9a008d00c03155895ab447/latest/${this.fromCurrency}`)
+      // fetch(`https://api.currencyfreaks.com/v2.0/rates/latest?apikey=cb1675f2fb5141a9ba6d8020b0d3fb8b`)
+      fetch(`https://cdn.moneyconvert.net/api/latest.json`)
         .then(res => res.json())
-        .then(data => {
+        .then(data =>{
           this.data = data;
-          this.rate = (data.conversion_rates[this.toCurrency]).toFixed(2);
-          this.amountes = (this.amount * this.rate).toFixed(2);
+          this.rate = Number(data.rates[this.fromCurrency]).toFixed(2)
+          // this.rate = (this.arrt).toFixed(2)
+          // this.arrts = Number(data.rates[this.toCurrency])
+          // this.amount = (this.arrts).toFixed(2)
+          this.amountes = (this.amount * data.rates[this.fromCurrency]).toFixed(2);
+          
+          // this.amountes = (this.amount * this.rate).toFixed(2);
           this.total = ((this.amount * this.rate) * 0.20).toFixed(2);
           this.totals = (Number(this.total) + Number(this.amountes)).toFixed(2);
-          this.convertedAmount = (this.amount * this.rate).toFixed(2);
-          this.times = (Date(data.time_last_update_utc));
-
+          this.lastUpdate = new Date(data.lastupdate).toLocaleString();
+          // this.convertedAmount = (this.amount * this.rate).toFixed(2);
+          // this.times = data.date;
         })
     },
-
+    
   },
   mounted() {
     this.fetchData();
+    
   },
 
 });
