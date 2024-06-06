@@ -7,20 +7,6 @@
           <v-col cols="12" md="12" class="tchange">
             <v-table class="table-change">
               <thead>
-                <tr>
-                  <th class="flag-pays"><v-img src="../assets/ust.png"></v-img></th>
-                  <th class="nom-pays" colspan="2">Dollar australien</th>
-                  <th><h3> {{ Number(amount)}} %<br><b>{{toCurrency}} / AUD</b></h3></th>
-                  <th><h3> {{ Number(amount)}} %<br><b>{{toCurrency}}  / AUD</b></h3></th>
-                  <th><h3> 0.40 % <br><b> {{toCurrency}}  / AUD</b></h3></th>
-                </tr>
-                <tr>
-                  <th class="flag-pays"><v-img src="../assets/ust.png"></v-img></th>
-                  <th class="nom-pays" colspan="2">Dollar US</th>
-                  <th><h3> 1.5087 <br><b>{{toCurrency}} / AUD</b></h3></th>
-                  <th><h3> 1.5087 <br><b>{{toCurrency}} / AUD</b></h3></th>
-                  <th><h3> 0.40 % <br><b>{{toCurrency}} / AUD</b></h3></th>
-                </tr>
                 <tr v-for="currency in currenciese" :key="currency.code">
                   <th class="flag-pays">
                     <v-img :src="getFlagUrl(currency.code)" :alt="currency.code" width="54"></v-img>
@@ -28,7 +14,11 @@
                   <th  class="nom-pays" colspan="2">{{ currency.name }}</th>
                   <th><h3>  {{ newsChange(currency.code) }} <br><b>{{toCurrency}} / {{ currency.code }}</b></h3></th>
                   <th><h3> {{ newChange(currency.code) }} <br><b>{{ currency.code }} / {{toCurrency}}</b></h3></th>
-                  <th><h3> {{ percentageChange(currency.code) }} % <br><b>{{toCurrency}} / {{ currency.code }}</b></h3></th>
+                  <th><h3 :style="{ color: percentageChange(currency.code) > 0 ? 'black' : 'red' }"> 
+                    <v-icon v-if="percentageChange(currency.code) > 0" color="green" left class="mr-3">fas fa-arrow-down</v-icon>
+                      <v-icon v-if="percentageChange(currency.code) <= 0" color="red" left class="mr-3">fas fa-arrow-up</v-icon>
+                    {{ percentageChange(currency.code) }} % 
+                    <br><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {{toCurrency}} / {{ currency.code }}</b></h3></th>
                 </tr>
             </thead>
             </v-table>
@@ -427,7 +417,7 @@
       const oldRate = Number(this.data.rates[this.toCurrency]);
       const newRate = Number(this.data.rates[currencyCode]);
 
-      return (((newRate - oldRate) / oldRate) * 100).toFixed(2);
+      return (((newRate - oldRate) / oldRate)).toFixed(2);
     },
     newChange(currencyCode) {
       if (!this.data) return 0;
@@ -445,9 +435,6 @@
 
       return (  newRate / oldRate ).toFixed(2);
     },
-    
-    
-
   },
   mounted() {
     this.fetchData();
@@ -457,6 +444,9 @@
 </script>
 <style scoped>
     @media (min-width: 1282px){
+      .h3 .v-icon{
+        margin-left: 12px;
+      }
       .taux {
         content: " ";
         position: absolute;
