@@ -388,18 +388,6 @@
       return ((newValue - oldValue) / oldValue) * 100;
     },
       fetchData() {
-      // fetch(`https://api.currencyfreaks.com/v2.0/rates/latest?apikey=cb1675f2fb5141a9ba6d8020b0d3fb8b&symbols=${this.toCurrency}`)
-      //   .then(res => res.json())
-      //   .then(data => {
-      //     this.data = data;
-      //     // this.amount = (data.conversion_rates[this.fromCurrency]).toFixed(2);
-      //     // this.amountes = (this.amount * this.rate).toFixed(2);
-      //     // this.total = ((this.amount * this.rate) * 0.20).toFixed(2);
-      //     // this.totals = (Number(this.total) + Number(this.amountes)).toFixed(2);
-      //     // this.convertedAmount = (this.amount * this.rate).toFixed(2);
-      //     // this.times = data.time_last_update_utc;
-      //   })
-      
       fetch(`https://cdn.moneyconvert.net/api/latest.json`)
         .then(res => res.json())
         .then(data =>{

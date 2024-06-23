@@ -2,17 +2,16 @@
     <v-row class="devices">
         <v-col cols="12">
           <v-col class="devices-title-box">
-            
-            <div v-for="code in currenciese" :key="code.id">
+            <div v-for="code in currencieses" :key="code.id">
               <p class="devices-title" v-if="code.code === toCurrency">Taux de change du  {{ (code.name).toUpperCase() }}</p>
-              <!-- <h1 class="devices-title">taux de change du dirham des Émirats arabes unis</h1> -->
             </div>
             <v-select v-model="toCurrency" :items="currencies" label="Vers la devise"></v-select>
-            
-            
           </v-col>
           <v-tabs v-model="tab" class="tabs">
-            <v-tab v-for="(region, index) in regions" :key="index"><h2>{{ region.name }}</h2></v-tab>
+            <v-tab  v-for="continent in continents" 
+        :key="continent" 
+        :class="{ active: selectedContinent === continent }"
+        @click="selectContinent(continent)"><h2>{{ continent }}</h2></v-tab>
           </v-tabs>
            <div class="title-colonne">
                 <tr>
@@ -22,46 +21,28 @@
                     <th class="variations"><h3>Variation</h3></th>
                 </tr>
            </div>
-            <!-- <v-tab-item class="tabs-items" v-for="(region, index) in regions" :key="index" v-show="tab === index"> -->
-              <div v-show="tab === index" v-for="(regions, index) in regions" :key="index" class="tabs-items" >
+              <div v-show="tab === index" v-for="(continents, index) in continents" :key="index" class="tabs-items" >
                 
               <v-simple-table class="table-change">
                 <thead class="table-header">
                  
-                    
-                    <tr v-for="currency in regions.currencies" :key="currency.name">
-                    <th class="flag-pays center-align middle-align" colspan="1"><v-img :src="currency.flag" alt="flag" width="100" height="60"></v-img></th>
+                  
+                    <tr v-for="currency in filteredCurrencies" :key="currency.code">
+                    <th class="flag-pays center-align middle-align" colspan="1"><v-img :src="getFlagUrl(currency.code)" :alt="currency.code"  width="100" height="60"></v-img></th>
                     <th class="nom-pays center-align middle-align" colspan="10"><h3>{{ currency.name }}</h3></th>
-                    <!-- <th class="text-right" colspan="2"><h3>{{ currency.buyRate }}</h3> </th> -->
-                    <th class="text-right"><h3>  {{ (currency.buyRate).toFixed(2) }} <br><b>{{toCurrency}} / {{ currency.code }}</b></h3></th>
-                    <th class="text-right" colspan="2"><h3>  {{ (currency.sellRate).toFixed(2) }} <br><b>{{currency.code}} / {{toCurrency  }}</b></h3></th>
+                    <th class="text-right"><h3> {{ newChange(currency.code) }} <br><b> {{toCurrency}} / {{ currency.code }}</b></h3></th>
+                    <th class="text-right" colspan="2"><h3> {{ newsChange(currency.code) }} <br><b> {{ currency.code }} / {{ toCurrency }}</b></h3></th>
                     <th class="text-right"><h3>
                       <v-icon v-if="currency.variation > 0" color=#AF0A0A left class="mr-3">fas fa-arrow-down</v-icon>
                       <v-icon v-if="currency.variation < 0" color="green" left class="mr-2">fas fa-arrow-up</v-icon>
                       <span class="variation" :style="{ color: currency.variation > 0 ? 'green' : 'red' }">
-                        {{    currency.variation }} %
+                        {{ Math.abs(currency.variation).toFixed(2) }}%
                       </span></h3>
                     </th>
                   </tr>
                 </thead>
-                <!-- <tbody class="tbod">
-                  <tr v-for="currency in currencies" :key="currency.name">
-                    <td class="flag-pays" colspan="1"><v-img :src="currency.flag" alt="flag" width="80" height="30"></v-img></td>
-                    <td class="nom-pays" colspan="5"><h3>{{ currency.name }}</h3></td>
-                    <td class="text-right" colspan="2"><h3>{{ currency.buyRate }}</h3> </td>
-                    <td class="text-right" colspan="1"><h3>{{ currency.sellRate }}</h3></td>
-                    <td class="text-right" colspan="2"><h3>
-                      <v-icon v-if="currency.variation > 0" color="red" left class="mr-1">fas fa-arrow-down</v-icon>
-                      <v-icon v-if="currency.variation < 0" color="green">fas fa-arrow-up</v-icon>
-                      <span :style="{ color: currency.variation > 0 ? 'green' : 'red' }">
-                        {{ currency.variation }} %
-                      </span></h3>
-                    </td>
-                  </tr>
-                </tbody> -->
               </v-simple-table>
             </div>
-            <!-- </v-tab-item> -->
         </v-col>
       </v-row>
 </template>
@@ -74,13 +55,17 @@ export default defineComponent({
 name: 'HomeView',
 data() {
   return {
-    tab: 0,
+    tab: 1,
     amount: null,
         recipientAmount: null,
         data: null,
         toCurrency: "EUR",
         fromCurrency: 'USD',
+        currenciess: [],
         Currency: this.fromCurrency,
+        selectedContinent: 'AMÉRIQUE DU NORD',
+        
+
         currencies: [
         "USD",
         "AED",
@@ -244,699 +229,1251 @@ data() {
         "ZAR",
         "ZMW",
         "ZWL",],
-        currenciese: [
-        { code: "USD", name: "United States Dollar" },
-        { code: "AED", name: "United Arab Emirates Dirham" },
-        { code: "AFN", name: "Afghan Afghani" },
-        { code: "ALL", name: "Albanian Lek" },
-        { code: "AMD", name: "Armenian Dram" },
-        { code: "ANG", name: "Netherlands Antillean Guilder" },
-        { code: "AOA", name: "Angolan Kwanza" },
-        { code: "ARS", name: "Argentine Peso" },
-        { code: "AUD", name: "Australian Dollar" },
-        { code: "AWG", name: "Aruban Florin" },
-        { code: "AZN", name: "Azerbaijani Manat" },
-        { code: "BAM", name: "Bosnia-Herzegovina Convertible Mark" },
-        { code: "BBD", name: "Barbadian Dollar" },
-        { code: "BDT", name: "Bangladeshi Taka" },
-        { code: "BGN", name: "Bulgarian Lev" },
-        { code: "BHD", name: "Bahraini Dinar" },
-        { code: "BIF", name: "Burundian Franc" },
-        { code: "BMD", name: "Bermudian Dollar" },
-        { code: "BND", name: "Brunei Dollar" },
-        { code: "BOB", name: "Bolivian Boliviano" },
-        { code: "BRL", name: "Brazilian Real" },
-        { code: "BSD", name: "Bahamian Dollar" },
-        { code: "BTN", name: "Bhutanese Ngultrum" },
-        { code: "BWP", name: "Botswana Pula" },
-        { code: "BYN", name: "Belarusian Ruble" },
-        { code: "BZD", name: "Belize Dollar" },
-        { code: "CAD", name: "Canadian Dollar" },
-        { code: "CDF", name: "Congolese Franc" },
-        { code: "CHF", name: "Swiss Franc" },
-        { code: "CLP", name: "Chilean Peso" },
-        { code: "CNY", name: "Chinese Yuan" },
-        { code: "COP", name: "Colombian Peso" },
-        { code: "CRC", name: "Costa Rican Colón" },
-        { code: "CUP", name: "Cuban Peso" },
-        { code: "CVE", name: "Cape Verdean Escudo" },
-        { code: "CZK", name: "Czech Koruna" },
-        { code: "DJF", name: "Djiboutian Franc" },
-        { code: "DKK", name: "Danish Krone" },
-        { code: "DOP", name: "Dominican Peso" },
-        { code: "DZD", name: "Algerian Dinar" },
-        { code: "EGP", name: "Egyptian Pound" },
-        { code: "ERN", name: "Eritrean Nakfa" },
-        { code: "ETB", name: "Ethiopian Birr" },
-        { code: "EUR", name: "Euro" },
-        { code: "FJD", name: "Fijian Dollar" },
-        { code: "FKP", name: "Falkland Islands Pound" },
-        { code: "FOK", name: "Faroese Króna" },
-        { code: "GBP", name: "British Pound Sterling" },
-        { code: "GEL", name: "Georgian Lari" },
-        { code: "GGP", name: "Guernsey Pound" },
-        { code: "GHS", name: "Ghanaian Cedi" },
-        { code: "GIP", name: "Gibraltar Pound" },
-        { code: "GMD", name: "Gambian Dalasi" },
-        { code: "GNF", name: "Guinean Franc" },
-        { code: "GTQ", name: "Guatemalan Quetzal" },
-        { code: "GYD", name: "Guyanese Dollar" },
-        { code: "HKD", name: "Hong Kong Dollar" },
-        { code: "HNL", name: "Honduran Lempira" },
-        { code: "HRK", name: "Croatian Kuna" },
-        { code: "HTG", name: "Haitian Gourde" },
-        { code: "HUF", name: "Hungarian Forint" },
-        { code: "IDR", name: "Indonesian Rupiah" },
-        { code: "ILS", name: "Israeli New Shekel" },
-        { code: "IMP", name: "Isle of Man Pound" },
-        { code: "INR", name: "Indian Rupee" },
-        { code: "IQD", name: "Iraqi Dinar" },
-        { code: "IRR", name: "Iranian Rial" },
-        { code: "ISK", name: "Icelandic Króna" },
-        { code: "JEP", name: "Jersey Pound" },
-        { code: "JMD", name: "Jamaican Dollar" },
-        { code: "JOD", name: "Jordanian Dinar" },
-        { code: "JPY", name: "Japanese Yen" },
-        { code: "KES", name: "Kenyan Shilling" },
-        { code: "KGS", name: "Kyrgyzstani Som" },
-        { code: "KHR", name: "Cambodian Riel" },
-        { code: "KID", name: "Kiribati Dollar" },
-        { code: "KMF", name: "Comorian Franc" },
-        { code: "KRW", name: "South Korean Won" },
-        { code: "KWD", name: "Kuwaiti Dinar" },
-        { code: "KYD", name: "Cayman Islands Dollar" },
-        { code: "KZT", name: "Kazakhstani Tenge" },
-        { code: "LAK", name: "Lao Kip" },
-        { code: "LBP", name: "Lebanese Pound" },
-        { code: "LKR", name: "Sri Lankan Rupee" },
-        { code: "LRD", name: "Liberian Dollar" },
-        { code: "LSL", name: "Lesotho Loti" },
-        { code: "LYD", name: "Libyan Dinar" },
-        { code: "MAD", name: "Moroccan Dirham" },
-        { code: "MDL", name: "Moldovan Leu" },
-        { code: "MGA", name: "Malagasy Ariary" },
-        { code: "MKD", name: "Macedonian Denar" },
-        { code: "MMK", name: "Burmese Kyat" },
-        { code: "MNT", name: "Mongolian Tögrög" },
-        { code: "MOP", name: "Macanese Pataca" },
-        { code: "MRU", name: "Mauritanian Ouguiya" },
-        { code: "MUR", name: "Mauritian Rupee" },
-        { code: "MVR", name: "Maldivian Rufiyaa" },
-        { code: "MWK", name: "Malawian Kwacha" },
-        { code: "MXN", name: "Mexican Peso" },
-        { code: "MYR", name: "Malaysian Ringgit" },
-        { code: "MZN", name: "Mozambican Metical" },
-        { code: "NAD", name: "Namibian Dollar" },
-        { code: "NGN", name: "Nigerian Naira" },
-        { code: "NIO", name: "Nicaraguan Córdoba" },
-        { code: "NOK", name: "Norwegian Krone" },
-        { code: "NPR", name: "Nepalese Rupee" },
-        { code: "NZD", name: "New Zealand Dollar" },
-        { code: "OMR", name: "Omani Rial" },
-        { code: "PAB", name: "Panamanian Balboa" },
-        { code: "PEN", name: "Peruvian Sol" },
-        { code: "PGK", name: "Papua New Guinean Kina" },
-        { code: "PHP", name: "Philippine Peso" },
-        { code: "PKR", name: "Pakistani Rupee" },
-        { code: "PLN", name: "Polish Złoty" },
-        { code: "PYG", name: "Paraguayan Guaraní" },
-        { code: "QAR", name: "Qatari Riyal" },
-        { code: "RON", name: "Romanian Leu" },
-        { code: "RSD", name: "Serbian Dinar" },
-        { code: "RUB", name: "Russian Ruble" },
-        { code: "RWF", name: "Rwandan Franc" },
-        { code: "SAR", name: "Saudi Riyal" },
-        { code: "SBD", name: "Solomon Islands Dollar" },
-        { code: "SCR", name: "Seychellois Rupee" },
-        { code: "SDG", name: "Sudanese Pound" },
-        { code: "SEK", name: "Swedish Krona" },
-        { code: "SGD", name: "Singapore Dollar" },
-        { code: "SHP", name: "Saint Helena Pound" },
-        { code: "SLE", name: "Sierra Leonean Leone" },
-        { code: "SLL", name: "Sierra Leonean Leone" },
-        { code: "SOS", name: "Somali Shilling" },
-        { code: "SRD", name: "Surinamese Dollar" },
-        { code: "SSP", name: "South Sudanese Pound" },
-        { code: "STN", name: "São Tomé and Príncipe Dobra" },
-        { code: "SYP", name: "Syrian Pound" },
-        { code: "SZL", name: "Eswatini Lilangeni" },
-        { code: "THB", name: "Thai Baht" },
-        { code: "TJS", name: "Tajikistani Somoni" },
-        { code: "TMT", name: "Turkmenistani Manat" },
-        { code: "TND", name: "Tunisian Dinar" },
-        { code: "TOP", name: "Tongan Paʻanga" },
-        { code: "TRY", name: "Turkish Lira" },
-        { code: "TTD", name: "Trinidad and Tobago Dollar" },
-        { code: "TVD", name: "Tuvaluan Dollar" },
-        { code: "TWD", name: "New Taiwan Dollar" },
-        { code: "TZS", name: "Tanzanian Shilling" },
-        { code: "UAH", name: "Ukrainian Hryvnia" },
-        { code: "UGX", name: "Ugandan Shilling" },
-        { code: "UYU", name: "Uruguayan Peso" },
-        { code: "UZS", name: "Uzbekistani Som" },
-        { code: "VES", name: "Venezuelan Bolívar" },
-        { code: "VND", name: "Vietnamese Đồng" },
-        { code: "VUV", name: "Vanuatu Vatu" },
-        { code: "WST", name: "Samoan Tālā" },
-        { code: "XAF", name: "Central African CFA Franc" },
-        { code: "XCD", name: "East Caribbean Dollar" },
-        { code: "XDR", name: "Special Drawing Rights" },
-        { code: "XOF", name: "West African CFA Franc" },
-        { code: "XPF", name: "CFP Franc" },
-        { code: "YER", name: "Yemeni Rial" },
-        { code: "ZAR", name: "South African Rand" },
-        { code: "ZMW", name: "Zambian Kwacha" },
-        { code: "ZWL", name: "Zimbabwean Dollar" },
-        // Add more currencies as needed
-      ],
-    regions: [
+currencieses: [
   {
-    name: 'Afrique',
-    currencies: [
-    
-      // Maroc
-      {
-        code: "MAD",
-        name: 'Dirham Marocain',
-        flag: 'https://flagsapi.com/MA/flat/64.png',
-        buyRate: 2.7304,
-        sellRate: 0.3663,
-        variation: 0.01
-      },
-      // Afrique du Sud
-      {
-        code: "ZAR",
-        name: 'Rand Sud-africain',
-        flag: 'https://flagsapi.com/ZA/flat/64.png',
-        buyRate: 5.0287,
-        sellRate: 0.1989,
-        variation: -0.04
-      },
-      // Égypte
-      {
-        code: "EGP",
-        name: 'Jenihea Égyptienne',
-        flag: 'https://flagsapi.com/EG/flat/64.png',
-        buyRate: 12.982,
-        sellRate: 0.07703,
-        variation: -0.57
-      },
-      // Tunisie
-      {
-        code: "TND",
-        name: 'Dinar Tunisien',
-        flag: 'https://flagsapi.com/TN/flat/64.png',
-        buyRate: 0.8515,
-        sellRate: 1.1744,
-        variation: 0.00
-      },
-      // Algérie
-      {
-        code: "DZD",
-        name: 'Dinar Algérien',
-        flag: 'https://flagsapi.com/DZ/flat/64.png',
-        buyRate: 138.275,
-        sellRate: 0.007235,
-        variation: 0.12
-      },
-      // Nigeria
-      {
-        code: "NGN",
-        name: 'Naira Nigérian',
-        flag: 'https://flagsapi.com/NG/flat/64.png',
-        buyRate: 513.43,
-        sellRate: 0.001948,
-        variation: -0.23
-      },
-      // Kenya
-      {
-        code: "KES",
-        name: 'Shilling Kenyan',
-        flag: 'https://flagsapi.com/KE/flat/64.png',
-        buyRate: 113.89,
-        sellRate: 0.008781,
-        variation: 0.05
-      },
-      // Côte d'Ivoire
-      {
-        code: "XOF",
-        name: 'Franc CFA (BCEAO)',
-        flag: 'https://flagsapi.com/CI/flat/64.png',
-        buyRate: 609.82,
-        sellRate: 0.001641,
-        variation: 0.09
-      },
-      // Ghana
-      {
-        code: "GHS",
-        name: 'Cedi Ghanéen',
-        flag: 'https://flagsapi.com/GH/flat/64.png',
-        buyRate: 6.1323,
-        sellRate: 0.1629,
-        variation: -0.02
-      },
-      // Tanzanie
-      {
-        code: "TZS",
-        name: 'Shilling Tanzanien',
-        flag: 'https://flagsapi.com/TZ/flat/64.png',
-        buyRate: 2310.92,
-        sellRate: 0.000433,
-        variation: 0.08
-      }
-    
-    ]
+    name: 'Dirham Marocain',
+    code: 'MAD',
+    buyRate: 10.73,
+    sellRate: 0.093,
+    variation: -0.01,
+    continent: 'AFRIQUE'
   },
   {
-    name: 'Amérique du Nord',
-    currencies: [
-      {
-        code: "USD",
-        name: "United States Dollar",
-        flag: 'https://flagsapi.com/US/flat/64.png',
-        buyRate: 3.6725,
-        sellRate: 3.6850,
-        variation: -0.02
-      },
-      {
-        code: "CAD",
-        name: "Canadian Dollar",
-        flag: 'https://flagsapi.com/CA/flat/64.png',
-        buyRate: 2.8700,
-        sellRate: 2.8850,
-        variation: 0.05
-      },
-      {
-        code: "MXN",
-        name: "Mexican Peso",
-        flag: 'https://flagsapi.com/MX/flat/64.png',
-        buyRate: 0.1782,
-        sellRate: 0.1814,
-        variation: -0.03
-      },
-      {
-        code: "BZD",
-        name: "Belize Dollar",
-        flag: 'https://flagsapi.com/BZ/flat/64.png',
-        buyRate: 1.8230,
-        sellRate: 1.8430,
-        variation: 0.02
-      },
-      {
-        code: "HTG",
-        name: "Haitian Gourde",
-        flag: 'https://flagsapi.com/HT/flat/64.png',
-        buyRate: 0.0395,
-        sellRate: 0.0410,
-        variation: 0.01
-      }
-    ]
+    name: 'Rand Sud-africain',
+    code: 'ZAR',
+    buyRate: 20.15,
+    sellRate: 0.050,
+    variation: -0.04,
+    continent: 'AFRIQUE'
   },
   {
-    name: 'Amérique du Sud',
-    currencies: [
-      {
-        code: "ARS",
-        name: "Peso Argentin",
-        flag: "https://flagsapi.com/AR/flat/64.png",
-        buyRate: 0.0205,
-        sellRate: 0.0210,
-        variation: -0.15
-      },
-      {
-        code: "BOB",
-        name: "Bolivian Boliviano",
-        flag: "https://flagsapi.com/BO/flat/64.png",
-        buyRate: 0.1440,
-        sellRate: 0.1412,
-        variation: -0.02
-      },
-      {
-        code: "BRL",
-        name: "Brazilian Real",
-        flag: "https://flagsapi.com/BR/flat/64.png",
-        buyRate: 0.2109,
-        sellRate: 0.2115,
-        variation: -0.01
-      },
-      {
-        code: "CLP",
-        name: "Chilean Peso",
-        flag: "https://flagsapi.com/CL/flat/64.png",
-        buyRate: 0.0025,
-        sellRate: 0.0026,
-        variation: 0.00
-      },
-      {
-        code: "COP",
-        name: "Colombian Peso",
-        flag: "https://flagsapi.com/CO/flat/64.png",
-        buyRate: 0.0009,
-        sellRate: 0.0009,
-        variation: 0.01
-      },
-      {
-        code: "UYU",
-        name: "Uruguayan Peso",
-        flag: "https://flagsapi.com/UY/flat/64.png",
-        buyRate: 0.0455,
-        sellRate: 0.0460,
-        variation: 0.02
-      },
-      {
-        code: "VEF",
-        name: "Venezuelan Bolívar",
-        flag: "https://flagsapi.com/VE/flat/64.png",
-        buyRate: 0.0004,
-        sellRate: 0.0004,
-        variation: -0.02
-      }
-    ]
+    name: 'Dollar Américain',
+    code: 'USD',
+    buyRate: 1.12,
+    sellRate: 0.89,
+    variation: 0.05,
+    continent: 'AMÉRIQUE DU NORD'
   },
   {
-    name: 'Asie',
-    currencies: [
-    {
-      name: 'Yen Japonais',
-      flag: 'https://flagsapi.com/JP/flat/64.png',
-      buyRate: 0.0332,
-      sellRate: 0.0334,
-      variation: 0.03
-    },
-    {
-      name: 'Dollar de Hong Kong',
-      flag: 'https://flagsapi.com/HK/flat/64.png',
-      buyRate: 0.1272,
-      sellRate: 0.1275,
-      variation: -0.01
-    },
-    {
-      name: 'Dollar de Singapour',
-      flag: 'https://flagsapi.com/SG/flat/64.png',
-      buyRate: 2.714,
-      sellRate: 2.718,
-      variation: 0.02
-    },
-    {
-      name: 'Baht Thaïlandais',
-      flag: 'https://flagsapi.com/TH/flat/64.png',
-      buyRate: 0.0312,
-      sellRate: 0.0314,
-      variation: 0.01
-    },
-    {
-      name: 'Roupie Indonésienne',
-      flag: 'https://flagsapi.com/ID/flat/64.png',
-      buyRate: 0.000023,
-      sellRate: 0.000024,
-      variation: -0.03
-    },
-    {
-      name: 'Roupie Indienne',
-      flag: 'https://flagsapi.com/IN/flat/64.png',
-      buyRate: 0.0135,
-      sellRate: 0.0136,
-      variation: 0.00
-    },
-    {
-      name: 'Roupie Pakistanaise',
-      flag: 'https://flagsapi.com/PK/flat/64.png',
-      buyRate: 0.0064,
-      sellRate: 0.0065,
-      variation: -0.02
-    },
-    {
-  name: 'Tenge Kazakh',
-  flag: 'https://flagsapi.com/KZ/flat/64.png',
-  buyRate: 0.0023,
-  sellRate: 0.0024,
-  variation: 0.00
-},
-{
-  name: 'Dong Vietnamien',
-  flag: 'https://flagsapi.com/VN/flat/64.png',
-  buyRate: 0.000043,
-  sellRate: 0.000044,
-  variation: -0.01
-},
-{
-  name: 'Som Ouzbek',
-  flag: 'https://flagsapi.com/UZ/flat/64.png',
-  buyRate: 0.000093,
-  sellRate: 0.000094,
-  variation: 0.00
-}
-  ]
+    name: 'Dirham des Émirats Arabes Unis',
+    code: 'AED',
+    buyRate: 3.67,
+    sellRate: 0.27,
+    variation: 0.01,
+    continent: 'MOYEN ORIENT'
   },
   {
-    name: 'Europe',
-    currencies: [
-    {
-      name: 'Euro',
-      code: 'EUR',
-      flag: 'https://flagsapi.com/EU/flat/64.png',
-      buyRate: 1.0, // Par exemple, le taux de change de l'euro peut être considéré comme 1:1
-      sellRate: 1.0,
-      variation: 0.0 // Vous pouvez ajouter la variation si vous avez les données réelles
-    },
-    {
-      name: 'Livre sterling',
-      code: 'GBP',
-      flag: 'https://flagsapi.com/GB/flat/64.png',
-      buyRate: 0.85, // Taux de change GBP vers EUR
-      sellRate: 1.18, // Taux de change GBP vers EUR
-      variation: -0.02 // Variation en pourcentage par rapport à la dernière mise à jour
-    },
-    {
-      name: 'Franc suisse',
-      code: 'CHF',
-      flag: 'https://flagsapi.com/CH/flat/64.png',
-      buyRate: 1.10, // Taux de change CHF vers EUR
-      sellRate: 0.91, // Taux de change CHF vers EUR
-      variation: 0.03 // Variation en pourcentage par rapport à la dernière mise à jour
-    },
-    {
-      name: 'Couronne danoise',
-      code: 'DKK',
-      flag: 'https://flagsapi.com/DK/flat/64.png',
-      buyRate: 7.43, // Taux de change DKK vers EUR
-      sellRate: 0.13, // Taux de change DKK vers EUR
-      variation: 0.01 // Variation en pourcentage par rapport à la dernière mise à jour
-    },
-    {
-  name: 'Couronne suédoise',
-  code: 'SEK',
-  flag: 'https://flagsapi.com/SE/flat/64.png',
-  buyRate: 10.20, // Taux de change SEK vers EUR
-  sellRate: 0.098, // Taux de change SEK vers EUR
-  variation: 0.02 // Variation en pourcentage par rapport à la dernière mise à jour
-},
-{
-  name: 'Couronne norvégienne',
-  code: 'NOK',
-  flag: 'https://flagsapi.com/NO/flat/64.png',
-  buyRate: 10.80, // Taux de change NOK vers EUR
-  sellRate: 0.093, // Taux de change NOK vers EUR
-  variation: -0.01 // Variation en pourcentage par rapport à la dernière mise à jour
-},
-{
-  name: 'Zloty polonais',
-  code: 'PLN',
-  flag: 'https://flagsapi.com/PL/flat/64.png',
-  buyRate: 4.57, // Taux de change PLN vers EUR
-  sellRate: 0.219, // Taux de change PLN vers EUR
-  variation: 0.05 // Variation en pourcentage par rapport à la dernière mise à jour
-},
-{
-  name: 'Forint hongrois',
-  code: 'HUF',
-  flag: 'https://flagsapi.com/HU/flat/64.png',
-  buyRate: 380.50, // Taux de change HUF vers EUR
-  sellRate: 0.0026, // Taux de change HUF vers EUR
-  variation: -0.03 // Variation en pourcentage par rapport à la dernière mise à jour
-},
-{
-  name: 'Couronne tchèque',
-  code: 'CZK',
-  flag: 'https://flagsapi.com/CZ/flat/64.png',
-  buyRate: 25.35, // Taux de change CZK vers EUR
-  sellRate: 0.039, // Taux de change CZK vers EUR
-  variation: 0.02 // Variation en pourcentage par rapport à la dernière mise à jour
-},
-    
-  ]
+    name: 'Afghani Afghane',
+    code: 'AFN',
+    buyRate: 78.25,
+    sellRate: 0.012,
+    variation: -0.02,
+    continent: 'ASIE'
   },
   {
-    name: 'Moyen Orient',
-    currencies: [
-    {
-      name: 'Riyal Saoudien',
-      flag: 'https://flagsapi.com/SA/flat/64.png',
-      buyRate: 0.977,
-      sellRate: 0.978,
-      variation: 0.00
-    },
-    {
-      name: 'United Arab Emirates Dirham',
-      flag: 'https://flagsapi.com/AE/flat/64.png',
-      buyRate: 3.6725,
-      sellRate: 3.6730,
-      variation: 0.01
-    },
-    {
-      name: 'Dinar Koweïtien',
-      flag: 'https://flagsapi.com/KW/flat/64.png',
-      buyRate: 3.29,
-      sellRate: 3.30,
-      variation: 0.05
-    },
-    {
-      name: 'Dinar Bahreïni',
-      flag: 'https://flagsapi.com/BH/flat/64.png',
-      buyRate: 2.65,
-      sellRate: 2.66,
-      variation: -0.02
-    },
-    {
-      name: 'Rial Omanais',
-      flag: 'https://flagsapi.com/OM/flat/64.png',
-      buyRate: 2.600,
-      sellRate: 2.601,
-      variation: 0.03
-    },
-    {
-      name: 'Dinar Jordanien',
-      flag: 'https://flagsapi.com/JO/flat/64.png',
-      buyRate: 1.410,
-      sellRate: 1.411,
-      variation: 0.01
-    },
-    {
-      name: 'Dinar Irakien',
-      flag: 'https://flagsapi.com/IQ/flat/64.png',
-      buyRate: 1450.00,
-      sellRate: 1451.00,
-      variation: 0.02
-    },
-    {
-      name: 'Livre Libanaise',
-      flag: 'https://flagsapi.com/LB/flat/64.png',
-      buyRate: 1507.50,
-      sellRate: 1508.50,
-      variation: 0.04
-    },
-    {
-      name: 'Rial Yéménite',
-      flag: 'https://flagsapi.com/YE/flat/64.png',
-      buyRate: 250.00,
-      sellRate: 251.00,
-      variation: -0.05
-    },
-    {
-      name: 'Shekel Palestinien',
-      flag: 'https://flagsapi.com/PS/flat/64.png',
-      buyRate: 3.28,
-      sellRate: 3.29,
-      variation: 0.01
-    }
-  ]
+    name: 'Lek Albanais',
+    code: 'ALL',
+    buyRate: 106.50,
+    sellRate: 0.0094,
+    variation: 0.03,
+    continent: 'EUROPE'
   },
   {
-    name: 'Océanie',
-    currencies: [
-      {
-        code: "AUD",
-        name: "Australian Dollar",
-        flag: "https://flagsapi.com/AU/flat/64.png",
-        buyRate: 2.631,
-        sellRate: 2.635,
-        variation: -0.01
-      },
-      {
-        code: "FJD",
-        name: "Fijian Dollar",
-        flag: "https://flagsapi.com/FJ/flat/64.png",
-        buyRate: 2.014,
-        sellRate: 2.018,
-        variation: 0.02
-      },
-      {
-        code: "TOP",
-        name: "Tongan Paʻanga",
-        flag: "https://flagsapi.com/TO/flat/64.png",
-        buyRate: 1.216,
-        sellRate: 1.22,
-        variation: 0.01
-      },
-      {
-        code: "WST",
-        name: "Samoan Tālā",
-        flag: "https://flagsapi.com/WS/flat/64.png",
-        buyRate: 1.337,
-        sellRate: 1.34,
-        variation: 0.03
-      },
-      {
-        code: "NZD",
-        name: "New Zealand Dollar",
-        flag: "https://flagsapi.com/NZ/flat/64.png",
-        buyRate: 2.121,
-        sellRate: 2.124,
-        variation: -0.02
-      },
-      {
-        code: "PGK",
-        name: "Papua New Guinean Kina",
-        flag: "https://flagsapi.com/PG/flat/64.png",
-        buyRate: 0.747,
-        sellRate: 0.75,
-        variation: 0.00
-      },
-    ]
+    name: 'Dram Arménien',
+    code: 'AMD',
+    buyRate: 484.0,
+    sellRate: 0.0021,
+    variation: 0.00,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Florin des Antilles Néerlandaises',
+    code: 'ANG',
+    buyRate: 1.79,
+    sellRate: 0.56,
+    variation: -0.01,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Kwanza Angolais',
+    code: 'AOA',
+    buyRate: 654.7,
+    sellRate: 0.0015,
+    variation: -0.05,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Peso Argentin',
+    code: 'ARS',
+    buyRate: 94.25,
+    sellRate: 0.011,
+    variation: -0.10,
+    continent: 'AMÉRIQUE DU SUD'
+  },
+  {
+    name: 'Dollar Australien',
+    code: 'AUD',
+    buyRate: 1.35,
+    sellRate: 0.74,
+    variation: 0.02,
+    continent: 'OCÉANIE'
+  },
+  {
+    name: 'Florin Arubais',
+    code: 'AWG',
+    buyRate: 1.79,
+    sellRate: 0.56,
+    variation: 0.00,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Manat Azerbaïdjanais',
+    code: 'AZN',
+    buyRate: 1.7,
+    sellRate: 0.59,
+    variation: 0.01,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Mark Convertible Bosniaque',
+    code: 'BAM',
+    buyRate: 1.95,
+    sellRate: 0.51,
+    variation: -0.01,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Dollar Barbadien',
+    code: 'BBD',
+    buyRate: 2.0,
+    sellRate: 0.50,
+    variation: 0.00,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Taka Bangladais',
+    code: 'BDT',
+    buyRate: 84.75,
+    sellRate: 0.011,
+    variation: -0.03,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Lev Bulgare',
+    code: 'BGN',
+    buyRate: 1.95,
+    sellRate: 0.51,
+    variation: 0.01,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Dinar Bahraini',
+    code: 'BHD',
+    buyRate: 0.38,
+    sellRate: 2.63,
+    variation: 0.02,
+    continent: 'MOYEN ORIENT'
+  },
+  {
+    name: 'Franc Burundais',
+    code: 'BIF',
+    buyRate: 1950.0,
+    sellRate: 0.00051,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Dollar Bermudien',
+    code: 'BMD',
+    buyRate: 1.0,
+    sellRate: 1.0,
+    variation: 0.00,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Dollar Brunéien',
+    code: 'BND',
+    buyRate: 1.35,
+    sellRate: 0.74,
+    variation: 0.01,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Boliviano Bolivien',
+    code: 'BOB',
+    buyRate: 6.89,
+    sellRate: 0.15,
+    variation: -0.01,
+    continent: 'AMÉRIQUE DU SUD'
+  },
+  {
+    name: 'Real Brésilien',
+    code: 'BRL',
+    buyRate: 5.35,
+    sellRate: 0.19,
+    variation: -0.04,
+    continent: 'AMÉRIQUE DU SUD'
+  },
+  {
+    name: 'Dollar Bahaméen',
+    code: 'BSD',
+    buyRate: 1.0,
+    sellRate: 1.0,
+    variation: 0.00,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Ngultrum Bhoutanais',
+    code: 'BTN',
+    buyRate: 74.0,
+    sellRate: 0.013,
+    variation: -0.01,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Pula Botswanais',
+    code: 'BWP',
+    buyRate: 11.0,
+    sellRate: 0.091,
+    variation: 0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Rouble Biélorusse',
+    code: 'BYN',
+    buyRate: 2.5,
+    sellRate: 0.40,
+    variation: -0.02,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Dollar Bélizéen',
+    code: 'BZD',
+    buyRate: 2.0,
+    sellRate: 0.50,
+    variation: 0.00,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Dollar Canadien',
+    code: 'CAD',
+    buyRate: 1.25,
+    sellRate: 0.80,
+    variation: 0.02,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Franc Congolais',
+    code: 'CDF',
+    buyRate: 2000.0,
+    sellRate: 0.00050,
+    variation: -0.03,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Franc Suisse',
+    code: 'CHF',
+    buyRate: 0.92,
+    sellRate: 1.09,
+    variation: 0.01,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Peso Chilien',
+    code: 'CLP',
+    buyRate: 750.0,
+    sellRate: 0.0013,
+    variation: 0.00,
+    continent: 'AMÉRIQUE DU SUD'
+  },
+  {
+    name: 'Yuan Chinois',
+    code: 'CNY',
+    buyRate: 6.47,
+    sellRate: 0.15,
+    variation: 0.01,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Peso Colombien',
+    code: 'COP',
+    buyRate: 3800.0,
+    sellRate: 0.00026,
+    variation: -0.01,
+    continent: 'AMÉRIQUE DU SUD'
+  },
+  {
+    name: 'Colon Costaricain',
+    code: 'CRC',
+    buyRate: 620.0,
+    sellRate: 0.0016,
+    variation: 0.00,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Peso Cubain',
+    code: 'CUP',
+    buyRate: 25.0,
+    sellRate: 0.040,
+    variation: -0.05,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Escudo Cap-Verdien',
+    code: 'CVE',
+    buyRate: 93.0,
+    sellRate: 0.011,
+    variation: 0.02,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Couronne Tchèque',
+    code: 'CZK',
+    buyRate: 22.0,
+    sellRate: 0.045,
+    variation: 0.00,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Franc Djiboutien',
+    code: 'DJF',
+    buyRate: 177.0,
+    sellRate: 0.0057,
+    variation: -0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Couronne Danoise',
+    code: 'DKK',
+    buyRate: 6.5,
+    sellRate: 0.15,
+    variation: 0.01,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Peso Dominicain',
+    code: 'DOP',
+    buyRate: 58.0,
+    sellRate: 0.017,
+    variation: 0.02,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Dinar Algérien',
+    code: 'DZD',
+    buyRate: 134.0,
+    sellRate: 0.0075,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Livre Égyptienne',
+    code: 'EGP',
+    buyRate: 15.6,
+    sellRate: 0.064,
+    variation: -0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Nakfa Érythréen',
+    code: 'ERN',
+    buyRate: 15.0,
+    sellRate: 0.067,
+    variation: 0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Birr Éthiopien',
+    code: 'ETB',
+    buyRate: 45.0,
+    sellRate: 0.022,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Euro',
+    code: 'EUR',
+    buyRate: 1.0,
+    sellRate: 1.0,
+    variation: 0.00,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Dollar Fidjien',
+    code: 'FJD',
+    buyRate: 2.1,
+    sellRate: 0.48,
+    variation: -0.02,
+    continent: 'OCÉANIE'
+  },
+  {
+    name: 'Livre des Îles Falkland',
+    code: 'FKP',
+    buyRate: 0.72,
+    sellRate: 1.39,
+    variation: 0.01,
+    continent: 'AMÉRIQUE DU SUD'
+  },
+  {
+    name: 'Livre Féroïenne',
+    code: 'FOK',
+    buyRate: 6.5,
+    sellRate: 0.15,
+    variation: 0.00,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Livre Sterling',
+    code: 'GBP',
+    buyRate: 0.85,
+    sellRate: 1.18,
+    variation: 0.03,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Lari Géorgien',
+    code: 'GEL',
+    buyRate: 3.0,
+    sellRate: 0.33,
+    variation: -0.01,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Livre de Guernesey',
+    code: 'GGP',
+    buyRate: 0.85,
+    sellRate: 1.18,
+    variation: 0.02,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Cedi Ghanéen',
+    code: 'GHS',
+    buyRate: 5.8,
+    sellRate: 0.17,
+    variation: 0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Livre de Gibraltar',
+    code: 'GIP',
+    buyRate: 0.85,
+    sellRate: 1.18,
+    variation: 0.00,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Dalasi Gambien',
+    code: 'GMD',
+    buyRate: 50.0,
+    sellRate: 0.020,
+    variation: -0.02,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Franc Guinéen',
+    code: 'GNF',
+    buyRate: 9750.0,
+    sellRate: 0.00010,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Quetzal Guatémaltèque',
+    code: 'GTQ',
+    buyRate: 7.7,
+    sellRate: 0.13,
+    variation: 0.01,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Dollar Guyanais',
+    code: 'GYD',
+    buyRate: 210.0,
+    sellRate: 0.0048,
+    variation: -0.01,
+    continent: 'AMÉRIQUE DU SUD'
+  },
+  {
+    name: 'Dollar de Hong Kong',
+    code: 'HKD',
+    buyRate: 7.8,
+    sellRate: 0.13,
+    variation: 0.00,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Lempira Hondurien',
+    code: 'HNL',
+    buyRate: 24.0,
+    sellRate: 0.042,
+    variation: 0.02,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Kuna Croate',
+    code: 'HRK',
+    buyRate: 6.5,
+    sellRate: 0.15,
+    variation: 0.01,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Gourde Haïtienne',
+    code: 'HTG',
+    buyRate: 94.0,
+    sellRate: 0.011,
+    variation: -0.03,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Forint Hongrois',
+    code: 'HUF',
+    buyRate: 300.0,
+    sellRate: 0.0033,
+    variation: 0.01,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Roupie Indonésienne',
+    code: 'IDR',
+    buyRate: 14500.0,
+    sellRate: 0.000069,
+    variation: 0.02,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Shekel Israélien',
+    code: 'ILS',
+    buyRate: 3.3,
+    sellRate: 0.30,
+    variation: 0.00,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Livre de l\'Île de Man',
+    code: 'IMP',
+    buyRate: 0.85,
+    sellRate: 1.18,
+    variation: 0.00,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Roupie Indienne',
+    code: 'INR',
+    buyRate: 74.0,
+    sellRate: 0.013,
+    variation: -0.01,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Dinar Irakien',
+    code: 'IQD',
+    buyRate: 1460.0,
+    sellRate: 0.00069,
+    variation: 0.01,
+    continent: 'MOYEN ORIENT'
+  },
+  {
+    name: 'Rial Iranien',
+    code: 'IRR',
+    buyRate: 42000.0,
+    sellRate: 0.000024,
+    variation: -0.05,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Couronne Islandaise',
+    code: 'ISK',
+    buyRate: 125.0,
+    sellRate: 0.0080,
+    variation: 0.01,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Livre de Jersey',
+    code: 'JEP',
+    buyRate: 0.85,
+    sellRate: 1.18,
+    variation: 0.00,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Dollar Jamaïcain',
+    code: 'JMD',
+    buyRate: 155.0,
+    sellRate: 0.0064,
+    variation: 0.02,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Dinar Jordanien',
+    code: 'JOD',
+    buyRate: 0.71,
+    sellRate: 1.41,
+    variation: 0.00,
+    continent: 'MOYEN ORIENT'
+  },
+  {
+    name: 'Yen Japonais',
+    code: 'JPY',
+    buyRate: 110.0,
+    sellRate: 0.0091,
+    variation: -0.01,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Shilling Kenyan',
+    code: 'KES',
+    buyRate: 108.0,
+    sellRate: 0.0093,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Som Kirghize',
+    code: 'KGS',
+    buyRate: 84.0,
+    sellRate: 0.012,
+    variation: -0.01,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Riel Cambodgien',
+    code: 'KHR',
+    buyRate: 4050.0,
+    sellRate: 0.00025,
+    variation: 0.02,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Dollar de Kiribati',
+    code: 'KID',
+    buyRate: 1.35,
+    sellRate: 0.74,
+    variation: 0.01,
+    continent: 'OCÉANIE'
+  },
+  {
+    name: 'Franc Comorien',
+    code: 'KMF',
+    buyRate: 450.0,
+    sellRate: 0.0022,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Won Sud-Coréen',
+    code: 'KRW',
+    buyRate: 1100.0,
+    sellRate: 0.00091,
+    variation: -0.01,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Dinar Koweïtien',
+    code: 'KWD',
+    buyRate: 0.30,
+    sellRate: 3.30,
+    variation: 0.00,
+    continent: 'MOYEN ORIENT'
+  },
+  {
+    name: 'Dollar des Îles Caïmans',
+    code: 'KYD',
+    buyRate: 0.83,
+    sellRate: 1.20,
+    variation: 0.01,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Tenge Kazakh',
+    code: 'KZT',
+    buyRate: 425.0,
+    sellRate: 0.0024,
+    variation: 0.00,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Kip Laotien',
+    code: 'LAK',
+    buyRate: 9400.0,
+    sellRate: 0.00011,
+    variation: -0.02,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Livre Libanaise',
+    code: 'LBP',
+    buyRate: 1500.0,
+    sellRate: 0.00067,
+    variation: 0.00,
+    continent: 'MOYEN ORIENT'
+  },
+  {
+    name: 'Roupie Sri-Lankaise',
+    code: 'LKR',
+    buyRate: 202.0,
+    sellRate: 0.0049,
+    variation: -0.01,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Dollar Libérien',
+    code: 'LRD',
+    buyRate: 170.0,
+    sellRate: 0.0059,
+    variation: 0.02,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Loti Lesothan',
+    code: 'LSL',
+    buyRate: 15.0,
+    sellRate: 0.067,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Dinar Libyen',
+    code: 'LYD',
+    buyRate: 4.5,
+    sellRate: 0.22,
+    variation: 0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Dirham Marocain',
+    code: 'MAD',
+    buyRate: 10.73,
+    sellRate: 0.093,
+    variation: -0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Leu Moldave',
+    code: 'MDL',
+    buyRate: 17.5,
+    sellRate: 0.057,
+    variation: -0.01,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Ariary Malgache',
+    code: 'MGA',
+    buyRate: 4000.0,
+    sellRate: 0.00025,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Denar Macédonien',
+    code: 'MKD',
+    buyRate: 61.5,
+    sellRate: 0.016,
+    variation: 0.01,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Kyat Birman',
+    code: 'MMK',
+    buyRate: 1500.0,
+    sellRate: 0.00067,
+    variation: -0.02,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Tugrik Mongol',
+    code: 'MNT',
+    buyRate: 2850.0,
+    sellRate: 0.00035,
+    variation: 0.00,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Pataca Macanaise',
+    code: 'MOP',
+    buyRate: 8.0,
+    sellRate: 0.13,
+    variation: 0.01,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Ouguiya Mauritanien',
+    code: 'MRU',
+    buyRate: 36.0,
+    sellRate: 0.028,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Roupie Mauricienne',
+    code: 'MUR',
+    buyRate: 40.0,
+    sellRate: 0.025,
+    variation: -0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Rufiyaa Maldivienne',
+    code: 'MVR',
+    buyRate: 15.4,
+    sellRate: 0.065,
+    variation: 0.00,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Kwacha Malawite',
+    code: 'MWK',
+    buyRate: 800.0,
+    sellRate: 0.0013,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Peso Mexicain',
+    code: 'MXN',
+    buyRate: 20.0,
+    sellRate: 0.050,
+    variation: 0.01,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Ringgit Malaisien',
+    code: 'MYR',
+    buyRate: 4.15,
+    sellRate: 0.24,
+    variation: 0.00,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Metical Mozambicain',
+    code: 'MZN',
+    buyRate: 62.5,
+    sellRate: 0.016,
+    variation: 0.02,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Dollar Namibien',
+    code: 'NAD',
+    buyRate: 15.0,
+    sellRate: 0.067,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Naira Nigérian',
+    code: 'NGN',
+    buyRate: 410.0,
+    sellRate: 0.0024,
+    variation: -0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Cordoba Nicaraguayen',
+    code: 'NIO',
+    buyRate: 35.0,
+    sellRate: 0.029,
+    variation: 0.01,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Couronne Norvégienne',
+    code: 'NOK',
+    buyRate: 8.6,
+    sellRate: 0.12,
+    variation: 0.02,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Roupie Népalaise',
+    code: 'NPR',
+    buyRate: 117.0,
+    sellRate: 0.0085,
+    variation: 0.00,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Dollar Néo-Zélandais',
+    code: 'NZD',
+    buyRate: 1.45,
+    sellRate: 0.69,
+    variation: 0.01,
+    continent: 'OCÉANIE'
+  },
+  {
+    name: 'Rial Omanais',
+    code: 'OMR',
+    buyRate: 0.39,
+    sellRate: 2.56,
+    variation: -0.02,
+    continent: 'MOYEN ORIENT'
+  },
+  {
+    name: 'Balboa Panaméen',
+    code: 'PAB',
+    buyRate: 1.0,
+    sellRate: 1.0,
+    variation: 0.00,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Sol Péruvien',
+    code: 'PEN',
+    buyRate: 3.4,
+    sellRate: 0.29,
+    variation: 0.02,
+    continent: 'AMÉRIQUE DU SUD'
+  },
+  {
+    name: 'Kina Papouasienne-Néo-Guinéenne',
+    code: 'PGK',
+    buyRate: 3.5,
+    sellRate: 0.29,
+    variation: 0.01,
+    continent: 'OCÉANIE'
+  },
+  {
+    name: 'Peso Philippin',
+    code: 'PHP',
+    buyRate: 48.0,
+    sellRate: 0.021,
+    variation: -0.01,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Roupie Pakistanaise',
+    code: 'PKR',
+    buyRate: 158.0,
+    sellRate: 0.0063,
+    variation: 0.00,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Zloty Polonais',
+    code: 'PLN',
+    buyRate: 4.3,
+    sellRate: 0.23,
+    variation: 0.02,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Guarani Paraguayen',
+    code: 'PYG',
+    buyRate: 6800.0,
+    sellRate: 0.00015,
+    variation: 0.00,
+    continent: 'AMÉRIQUE DU SUD'
+  },
+  {
+    name: 'Rial Qatari',
+    code: 'QAR',
+    buyRate: 3.64,
+    sellRate: 0.27,
+    variation: 0.00,
+    continent: 'MOYEN ORIENT'
+  },
+  {
+    name: 'Leu Roumain',
+    code: 'RON',
+    buyRate: 4.1,
+    sellRate: 0.24,
+    variation: 0.01,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Dinar Serbe',
+    code: 'RSD',
+    buyRate: 100.0,
+    sellRate: 0.010,
+    variation: 0.00,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Rouble Russe',
+    code: 'RUB',
+    buyRate: 73.0,
+    sellRate: 0.013,
+    variation: 0.01,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Franc Rwandais',
+    code: 'RWF',
+    buyRate: 980.0,
+    sellRate: 0.0010,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Riyal Saoudien',
+    code: 'SAR',
+    buyRate: 3.75,
+    sellRate: 0.27,
+    variation: -0.01,
+    continent: 'MOYEN ORIENT'
+  },
+  {
+    name: 'Dollar Salomonais',
+    code: 'SBD',
+    buyRate: 8.0,
+    sellRate: 0.13,
+    variation: 0.01,
+    continent: 'OCÉANIE'
+  },
+  {
+    name: 'Roupie Seychelloise',
+    code: 'SCR',
+    buyRate: 14.0,
+    sellRate: 0.071,
+    variation: 0.02,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Livre Soudanaise',
+    code: 'SDG',
+    buyRate: 55.0,
+    sellRate: 0.018,
+    variation: 0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Couronne Suédoise',
+    code: 'SEK',
+    buyRate: 8.3,
+    sellRate: 0.12,
+    variation: -0.01,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Dollar Singapourien',
+    code: 'SGD',
+    buyRate: 1.34,
+    sellRate: 0.75,
+    variation: 0.00,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Dollar de Suriname',
+    code: 'SRD',
+    buyRate: 21.0,
+    sellRate: 0.048,
+    variation: 0.00,
+    continent: 'AMÉRIQUE DU SUD'
+  },
+  {
+    name: 'Dobra de São Tomé et Príncipe',
+    code: 'STN',
+    buyRate: 22.0,
+    sellRate: 0.045,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Colon Salvadorien',
+    code: 'SVC',
+    buyRate: 8.75,
+    sellRate: 0.11,
+    variation: 0.02,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Livre Syrienne',
+    code: 'SYP',
+    buyRate: 1250.0,
+    sellRate: 0.00080,
+    variation: 0.00,
+    continent: 'MOYEN ORIENT'
+  },
+  {
+    name: 'Lilangeni Swazi',
+    code: 'SZL',
+    buyRate: 15.0,
+    sellRate: 0.067,
+    variation: 0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Baht Thaïlandais',
+    code: 'THB',
+    buyRate: 32.0,
+    sellRate: 0.031,
+    variation: 0.01,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Somoni Tadjik',
+    code: 'TJS',
+    buyRate: 11.0,
+    sellRate: 0.091,
+    variation: 0.02,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Manat Turkmène',
+    code: 'TMT',
+    buyRate: 3.5,
+    sellRate: 0.29,
+    variation: 0.00,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Dinar Tunisien',
+    code: 'TND',
+    buyRate: 2.8,
+    sellRate: 0.36,
+    variation: 0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Pa’anga Tongien',
+    code: 'TOP',
+    buyRate: 2.3,
+    sellRate: 0.44,
+    variation: -0.01,
+    continent: 'OCÉANIE'
+  },
+  {
+    name: 'Lire Turque',
+    code: 'TRY',
+    buyRate: 8.5,
+    sellRate: 0.12,
+    variation: 0.00,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Dollar Trinidien',
+    code: 'TTD',
+    buyRate: 6.8,
+    sellRate: 0.15,
+    variation: 0.01,
+    continent: 'AMÉRIQUE DU NORD'
+  },
+  {
+    name: 'Dollar Taïwanais',
+    code: 'TWD',
+    buyRate: 27.0,
+    sellRate: 0.037,
+    variation: 0.01,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Shilling Tanzanien',
+    code: 'TZS',
+    buyRate: 2315.0,
+    sellRate: 0.00043,
+    variation: 0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Hryvnia Ukrainienne',
+    code: 'UAH',
+    buyRate: 27.5,
+    sellRate: 0.036,
+    variation: 0.00,
+    continent: 'EUROPE'
+  },
+  {
+    name: 'Shilling Ougandais',
+    code: 'UGX',
+    buyRate: 3800.0,
+    sellRate: 0.00026,
+    variation: 0.00,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Peso Uruguayen',
+    code: 'UYU',
+    buyRate: 42.0,
+    sellRate: 0.024,
+    variation: 0.00,
+    continent: 'AMÉRIQUE DU SUD'
+  },
+  {
+    name: 'Soum Ouzbek',
+    code: 'UZS',
+    buyRate: 10450.0,
+    sellRate: 0.00010,
+    variation: 0.00,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Bolivar Vénézuélien',
+    code: 'VES',
+    buyRate: 3200000.0,
+    sellRate: 0.0000015,
+    variation: -0.02,
+    continent: 'AMÉRIQUE DU SUD'
+  },
+  {
+    name: 'Dong Vietnamien',
+    code: 'VND',
+    buyRate: 23000.0,
+    sellRate: 0.00043,
+    variation: 0.00,
+    continent: 'ASIE'
+  },
+  {
+    name: 'Vatu Vanuatuan',
+    code: 'VUV',
+    buyRate: 109.0,
+    sellRate: 0.0092,
+    variation: 0.01,
+    continent: 'OCÉANIE'
+  },
+  {
+    name: 'Tala Samoan',
+    code: 'WST',
+    buyRate: 2.6,
+    sellRate: 0.39,
+    variation: 0.02,
+    continent: 'OCÉANIE'
+  },
+  {
+    name: 'Rand Sud-Africain',
+    code: 'ZAR',
+    buyRate: 15.0,
+    sellRate: 0.067,
+    variation: 0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Kwacha Zambien',
+    code: 'ZMW',
+    buyRate: 22.5,
+    sellRate: 0.044,
+    variation: -0.01,
+    continent: 'AFRIQUE'
+  },
+  {
+    name: 'Dollar Zimbabwéen',
+    code: 'ZWL',
+    buyRate: 361.9,
+    sellRate: 0.0028,
+    variation: 0.00,
+    continent: 'AFRIQUE'
   }
-]
+],
 
+continents: ['AFRIQUE', 'AMÉRIQUE DU NORD', 'AMÉRIQUE DU SUD', 'ASIE', 'MOYEN ORIENT' , 'EUROPE', 'OCÉANIE'],
   }
 },
 methods: {
-  methods: {
-      getFlagUrl(currencyCode) {
+  getFlagUrl(currencyCode) {
       return `https://flagsapi.com/${currencyCode.slice(0, 2).toUpperCase()}/flat/64.png`;
     },
-    
-      currencyChanged() {
-      console.log("Selected currency:", this.toCurrency);
-      },
-      convertCurrency() {
-        // Implement currency conversion logic
-        console.log("Convert", this.amount, this.fromCurrency, "to", this.toCurrency);
-      },
-      transferMoney() {
-        // Implement money transfer logic
-        console.log("Transfer", this.transferAmount, this.sendCurrency, "to", this.receiveCurrency);
-      },
-      calculatePercentageChange(newValue, oldValue) {
-      return ((newValue - oldValue) / oldValue) * 100;
-    },
-      fetchData() {
-        fetch(`https://cdn.moneyconvert.net/api/latest.json`)
+    async fetchData() {
+      fetch(`https://cdn.moneyconvert.net/api/latest.json`)
         .then(res => res.json())
         .then(data =>{
           this.data = data;
-          this.rate = Number(data.rates[this.fromCurrency]).toFixed(2)
+          this.rate = Number(data.rates[this.toCurrency]).toFixed(2)
           this.rate = Number(data.rates[this.fromCurrency]).toFixed(2);
             this.amountes = (this.amount * data.rates[this.fromCurrency]).toFixed(2);
             this.total = ((this.amount * this.rate) * 0.20).toFixed(2);
             this.totals = (Number(this.total) + Number(this.amountes)).toFixed(2);
         })
-    },
-    percentageChange(currencyCode) {
-      if (!this.data) return 0;
-
-      const oldRate = Number(this.data.rates[this.toCurrency]);
-      const newRate = Number(this.data.rates[currencyCode]);
-
-      return (((newRate - oldRate) / oldRate) * 100).toFixed(2);
     },
     newChange(currencyCode) {
       if (!this.data) return 0;
@@ -954,10 +1491,17 @@ methods: {
 
       return (  newRate / oldRate ).toFixed(2);
     },
+    selectContinent(continent) {
+      this.selectedContinent = continent;
+    },
+  },
+  computed: {
+    filteredCurrencies() {
+      return this.currencieses.filter(currency => currency.continent === this.selectedContinent);
+    }
   },
   mounted() {
     this.fetchData();
-  },
 },
 components: {
 },
@@ -1148,6 +1692,9 @@ components: {
       left: 2%;
       font-size:20%;
     }
-     
+     v-tab.active {
+        background-color: #007bff;
+      color: white;
+    }
     
 </style>

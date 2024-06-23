@@ -1,13 +1,14 @@
 <template>
-  <v-app id="home">
+  <v-app>
     <NavBar />
-    <v-container fluid>
+      <v-container fluid>
       <Test/>
       <Header />
       <Taux />
       <Devices />
       <Tchange />
     </v-container>
+    
   </v-app>
 </template>
 

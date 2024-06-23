@@ -1,5 +1,4 @@
 <template>
-    
     <v-row class="devices">
       <v-col class="devices-title-box">
         <h2 class="devices-title">Profils de devises</h2>
@@ -7,78 +6,6 @@
       <v-col cols="12" md="12" class="border-devices">
         <v-table class="table-devices">
           <thead class="thead-devices">
-            <!-- <tr>
-              <th><v-img src="../assets/ust.png"></v-img></th>
-              <th class="nom-pays" colspan="2">AUD - Dollar australien</th>
-            </tr>
-            <tr>
-              <th>image</th>
-              <th class="nom-pays" colspan="2">USD - Dollar US</th>
-            </tr>
-            <tr>
-              <th>image</th>
-              <th class="nom-pays" colspan="2">GBP - Pound British</th>
-            </tr>
-            <tr>
-              <th>image</th>
-              <th class="nom-pays" colspan="2">MYR - Ringgit de Malaisie </th>
-            </tr>
-            <tr>
-              <th>image</th>
-              <th class="nom-pays" colspan="2">SAR - Riyal Saudi </th>
-            </tr>
-            <tr>
-              <th>image</th>
-              <th class="nom-pays" colspan="2">EUR - Euro</th>
-            </tr>
-            <tr>
-              <th>image</th>
-              <th class="nom-pays" colspan="2">CNY - Yuan chinois Renminbi</th>
-            </tr>
-            <tr>
-              <th>image</th>
-              <th class="nom-pays" colspan="2">BRL - Réal Brésilien</th>
-            </tr>
-            <tr>
-              <th>image</th>
-              <th class="nom-pays" colspan="2">EGP - Jenihea Egyptienne</th>
-            </tr>
-            <tr>
-              <th><v-img src="../assets/ust.png"></v-img></th>
-              <th class="nom-pays" colspan="2">TND - Dinar Tunisien</th>
-            </tr>
-            <tr>
-              <th><v-img src="../assets/ust.png"></v-img></th>
-              <th class="nom-pays" colspan="2">TND - Dinar Tunisien</th>
-            </tr>
-            <tr>
-              <th><v-img src="../assets/ust.png"></v-img></th>
-              <th class="nom-pays" colspan="2">TND - Dinar Tunisien</th>
-            </tr>
-            <tr>
-              <th><v-img src="../assets/ust.png"></v-img></th>
-              <th class="nom-pays" colspan="2">TND - Dinar Tunisien</th>
-            </tr>
-            <tr>
-              <th><v-img src="../assets/ust.png"></v-img></th>
-              <th class="nom-pays" colspan="2">TND - Dinar Tunisien</th>
-            </tr>
-            <tr>
-              <th><v-img src="../assets/ust.png"></v-img></th>
-              <th class="nom-pays" colspan="2">TND - Dinar Tunisien</th>
-            </tr>
-            <tr>
-              <th><v-img src="../assets/ust.png"></v-img></th>
-              <th class="nom-pays" colspan="2">TND - Dinar Tunisien</th>
-            </tr>
-            <tr>
-              <th><v-img src="../assets/ust.png"></v-img></th>
-              <th class="nom-pays" colspan="2">TND - Dinar Tunisien</th>
-            </tr>
-            <tr>
-              <th><v-img src="../assets/ust.png"></v-img></th>
-              <th class="nom-pays" colspan="2">TND - Dinar Tunisien</th>
-            </tr> -->
             <tr v-for="currency in currenciese" :key="currency.code">
                   <th>
                     <v-img :src="getFlagUrl(currency.code)" :alt="currency.code" width="54"></v-img>
@@ -89,10 +16,6 @@
         </v-table>
         <v-table class="table-device">
           <thead>
-            <!-- <tr>
-              <th><v-img src="../assets/ust.png"></v-img></th>
-              <th class="nom-pays" colspan="2">Dollar australien</th>
-            </tr>-->
             <tr v-for="currency in currencies" :key="currency.code">
                   <th>
                     <v-img :src="getFlagUrl(currency.code)" :alt="currency.code" width="54"></v-img>
@@ -103,9 +26,7 @@
         </v-table>
       </v-col>
     </v-row>
-
 </template>
-
 <script>
 import { defineComponent } from 'vue';
 
@@ -287,12 +208,6 @@ methods: {
   getFlagUrl(currencyCode) {
       return `https://flagsapi.com/${currencyCode.slice(0, 2).toUpperCase()}/flat/64.png`;
     },
-  // convert() {
-  //   // Perform currency conversion logic here
-  //   // This will likely involve fetching exchange rates from an API
-  //   const rate = 1.2; // Placeholder exchange rate
-  //   this.convertedAmount = (this.amount * rate).toFixed(2);
-  // },
   convertCurrency() {
     // Implement currency conversion logic
     console.log("Convert", this.amount, this.fromCurrency, "to", this.toCurrency);
