@@ -54,7 +54,8 @@ export default defineComponent({
       data: [],
       amount: '1',
       amounts: null,
-      amountes: null,
+      amountes: 0,
+      amountese: 0,
       recipientAmount: null,
       fromCurrency: 'EUR',
       toCurrency: 'USD',
@@ -252,7 +253,8 @@ export default defineComponent({
           // this.rate = (this.arrt).toFixed(2)
           // this.arrts = Number(data.rates[this.toCurrency])
           // this.amount = (this.arrts).toFixed(2)
-          this.amountes = (this.amount * data.rates[this.fromCurrency]).toFixed(2);
+          this.amountese = (this.amount * data.rates[this.fromCurrency]).toFixed(2);
+          this.amountes = (this.amountese * data.rates[this.toCurrency]).toFixed(2);
           
           // this.amountes = (this.amount * this.rate).toFixed(2);
           this.total = ((this.amount * this.rate) * 0.20).toFixed(2);
